@@ -8,6 +8,7 @@ const PeopleList = () => {
   // but storing in useState hook b/c of time constraint
   const people = useFetchPeople();
   const homeworldURLtoHomeworldMapping = useFetchHomeworldMapping(people);
+  const [inputText, setInputText] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const [filteredPeople, setFilteredPeople] = useState([]);
 
@@ -16,19 +17,32 @@ const PeopleList = () => {
     homeWorldOptionList.push({ value: value, label: key });
   });
 
+  let inputHandler = (e) => {
+    var lowerCase = e.target.value.toLowerCase();
+    setInputText(lowerCase);
+  };
+
   useEffect(() => {
-    const filteredPeople = [];
-    people.forEach((person) => {
-      if (person.homeworld === filterValue) {
-        filteredPeople.push(person);
-      }
-    });
+    let filteredPeople = [...people];
+
+    if (filterValue) {
+      filteredPeople = filteredPeople.filter(
+        (person) => person.homeworld === filterValue
+      );
+    }
+
+    if (inputText) {
+      filteredPeople = filteredPeople.filter((person) =>
+        person.name.toLowerCase().includes(inputText)
+      );
+    }
+
     setFilteredPeople(filteredPeople);
-  }, [filterValue]);
+  }, [filterValue, inputText]);
 
   let peopleList;
 
-  if (filterValue) {
+  if (filterValue || inputText) {
     peopleList = (
       <ul>
         {filteredPeople.map((person, i) => (
@@ -63,6 +77,14 @@ const PeopleList = () => {
         value={filterValue}
         onChange={(event) => setFilterValue(event.target.value)}
       />
+      <div>
+        <input
+          type="text"
+          placeholder="Name"
+          value={inputText}
+          onChange={inputHandler}
+        />
+      </div>
       {peopleList}
     </div>
   );
